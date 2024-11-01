@@ -26,14 +26,15 @@ class Portfolio[Stock: StockBase]:
         )
 
     def annual_profit(self, start: datetime, end: datetime) -> Decimal:
-        years = Decimal((end - start).days / 365.25)
+        years = Decimal((end - start).days / 365)
         return (
             reduce(
                 operator.mul,
                 (
-                    (1 + (stock.price(end) - stock.price(start) / stock.price(start))) ** (1 / years)
+                    (1 + ((stock.price(end) - stock.price(start)) / stock.price(start))) ** (1 / years)
                     for stock in self.stocks
                 ),
+                1,
             )
             - 1
         )

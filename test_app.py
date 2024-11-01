@@ -28,8 +28,10 @@ class MockedStock(StockBase):
         raise ValueError(f"Stock price not found for date {date}")
 
 
-def stock_data_generator(profit: Decimal, start_date: datetime, end_date: datetime) -> Iterator[StockData]:
-    initial_price, date = Decimal(0), start_date
+def stock_data_generator(
+    profit: Decimal, start_date: datetime, end_date: datetime, initial_price: Decimal = Decimal(0)
+) -> Iterator[StockData]:
+    date = start_date
     yield StockData(price=initial_price, date=date)
     while date < end_date - timedelta(days=1):
         date += timedelta(days=1)
@@ -111,3 +113,15 @@ class TestPorfolio(TestCase):
                     portfolio.profit(*range_dates),
                     expected_profit,
                 )
+
+    def test_annual_profit(self):
+        range_dates = datetime(2021, 1, 1), datetime(2022, 1, 1)
+        portfolio = Portfolio(
+            stocks=[
+                MockedStock(
+                    name="AAPL",
+                    ordered_prices=list(stock_data_generator(Decimal(1), *range_dates, initial_price=Decimal(1))),
+                ),
+            ],
+        )
+        self.assertEqual(portfolio.annual_profit(*range_dates), Decimal(1))
